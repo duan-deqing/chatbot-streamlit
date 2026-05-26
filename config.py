@@ -4,7 +4,7 @@
 PAGE_CONFIG = {
     "page_title": "AI Chat",
     "page_icon": "💬",
-    "layout": "wide",
+    "layout": "centered",
     "initial_sidebar_state": "expanded"
 }
 

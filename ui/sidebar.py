@@ -141,9 +141,8 @@ def render_sidebar(conv_manager: ConversationManager, model_manager: ModelManage
         
         # 未填 API Key 时的提醒
         if not st.session_state.get("api_key", ""):
-            st.warning("⚠️ 使用非本地模型请在上方输入 OpenAI API Key")
-        
-        st.markdown("---")
+            st.warning("⚠️ 使用非本地模型请在上方输入 API Key")
+
         
         # 模型选择
         _render_model_selector(model_manager)
@@ -188,5 +187,15 @@ def render_sidebar(conv_manager: ConversationManager, model_manager: ModelManage
                     if not is_active:
                         conv_manager.switch_to(conv.id)
                         st.rerun()
-    
+
+        st.markdown("---")
+
+        if st.button(
+            "⚙️ 设置",
+            key="settings_btn",
+            use_container_width=True
+        ):
+            st.session_state.show_settings = True
+            st.rerun()
+
     return st.session_state.get("api_key", "")
