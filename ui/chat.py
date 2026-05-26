@@ -23,6 +23,9 @@ def render_chat_interface(conv_manager: ConversationManager, model_manager: Mode
     # 获取当前模型
     current_model = model_manager.get_model(st.session_state.current_model_key)
     
+    # 为每个对话生成唯一的文件上传 key
+    upload_key = f"{UPLOAD_CONFIG['key']}_{current_conv.id}"
+    
     st.title("💬 AI Chat")
     st.caption(f"当前对话：{current_conv.title} | 模型：{current_model.name if current_model else '未选择'}")
     
@@ -31,11 +34,11 @@ def render_chat_interface(conv_manager: ConversationManager, model_manager: Mode
         with st.chat_message(msg.role):
             st.markdown(msg.content)
     
-    # 文件上传组件
+    # 文件上传组件（使用对话特定的 key）
     uploaded_file = st.file_uploader(
         "📎 上传文件 (支持 .txt, .csv, .json, .py 等文本文件)",
         type=UPLOAD_CONFIG["allowed_types"],
-        key=UPLOAD_CONFIG["key"],
+        key=upload_key,
         label_visibility="collapsed"
     )
     
@@ -49,7 +52,7 @@ def render_chat_interface(conv_manager: ConversationManager, model_manager: Mode
     # 处理用户输入
     if user_input:
         _process_user_input(
-            user_input, uploaded_file, current_conv, current_model, conv_manager
+            user_input, uploaded_file, current_conv, current_model, conv_manager, upload_key
         )
 
 
@@ -58,7 +61,8 @@ def _process_user_input(
     uploaded_file,
     current_conv: Conversation,
     current_model,
-    conv_manager: ConversationManager
+    conv_manager: ConversationManager,
+    upload_key: str
 ):
     """处理用户输入
     
@@ -68,6 +72,7 @@ def _process_user_input(
         current_conv: 当前对话
         current_model: 当前模型
         conv_manager: 对话管理器
+        upload_key: 文件上传组件的key
     """
     full_prompt = user_input
     
@@ -81,9 +86,9 @@ def _process_user_input(
             full_prompt = FileService.format_file_prompt(
                 file_content, uploaded_file.name, user_input
             )
-            # 清除文件上传器的状态
-            if UPLOAD_CONFIG["key"] in st.session_state:
-                del st.session_state[UPLOAD_CONFIG["key"]]
+            # 清除该对话的文件上传器状态
+            if upload_key in st.session_state:
+                del st.session_state[upload_key]
     
     # 将用户消息添加到当前对话
     current_conv.add_message("user", full_prompt)

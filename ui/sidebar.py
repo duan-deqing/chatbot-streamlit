@@ -141,7 +141,7 @@ def render_sidebar(conv_manager: ConversationManager, model_manager: ModelManage
         
         # 未填 API Key 时的提醒
         if not st.session_state.get("api_key", ""):
-            st.warning("⚠️ 请在上方输入 OpenAI API Key 以开始对话")
+            st.warning("⚠️ 使用非本地模型请在上方输入 OpenAI API Key")
         
         st.markdown("---")
         
@@ -153,8 +153,15 @@ def render_sidebar(conv_manager: ConversationManager, model_manager: ModelManage
         
         st.markdown("---")
         
-        # 新建对话按钮
-        if st.button("➕ 新建对话", use_container_width=True):
+        # 新建对话按钮 - 只有当前对话有消息时才能创建新对话
+        current_conv = conv_manager.get_current()
+        can_create_new = current_conv is not None and len(current_conv.messages) > 0
+        
+        if st.button(
+            "➕ 新建对话",
+            use_container_width=True,
+            disabled=not can_create_new
+        ):
             conv_manager.create_conversation()
             st.rerun()
         
