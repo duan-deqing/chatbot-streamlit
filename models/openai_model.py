@@ -43,7 +43,7 @@ class OpenAIModel(BaseModel):
             )
             return response.choices[0].message.content
         except Exception as e:
-            return f"⚠️ API 调用出错: {str(e)}"
+            return f"⚠️ API 调用出错: {type(e).__name__}"
     
     def is_available(self) -> bool:
         """检查是否可用"""

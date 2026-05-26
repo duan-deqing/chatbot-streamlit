@@ -17,7 +17,7 @@ def render_chat_interface(conv_manager: ConversationManager, model_manager: Mode
     """
     current_conv = conv_manager.get_current()
     if current_conv is None:
-        st.error("当前对话不存在，请刷新页面或新建对话。")
+        st.info("👈 请在左侧侧边栏创建一个新对话开始聊天")
         st.stop()
     
     # 获取当前模型

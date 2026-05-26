@@ -69,7 +69,7 @@ class OllamaModel(BaseModel):
             model_list = [m.id for m in models.data]
             self._update_cache(status, model_list)
             return status
-        except:
+        except Exception:
             self._update_cache(False, [])
             return False
     
@@ -83,7 +83,7 @@ class OllamaModel(BaseModel):
             model_list = [m.id for m in models.data]
             self._update_cache(True, model_list)
             return model_list
-        except:
+        except Exception:
             return OllamaModel._models_cache or []
     
     @classmethod

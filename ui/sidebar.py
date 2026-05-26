@@ -156,9 +156,15 @@ def render_sidebar(conv_manager: ConversationManager, model_manager: ModelManage
         # 新建对话按钮 - 只有当前对话有消息时才能创建新对话
         current_conv = conv_manager.get_current()
         can_create_new = current_conv is not None and len(current_conv.messages) > 0
-        
+
+        st.markdown(
+            '<div class="nc-marker" style="display:none"></div>',
+            unsafe_allow_html=True
+        )
+
         if st.button(
-            "➕ 新建对话",
+            "新建对话",
+            key="new_conv_btn",
             use_container_width=True,
             disabled=not can_create_new
         ):
@@ -166,23 +172,21 @@ def render_sidebar(conv_manager: ConversationManager, model_manager: ModelManage
             st.rerun()
         
         st.markdown("### 📜 历史记录")
-        
-        # 显示所有历史对话 (最新在上方)
-        for conv in conv_manager.get_all_sorted(reverse=True):
-            is_active = conv.id == conv_manager.current_id
-            msg_count = len(conv.messages)
-            
-            # 使用按钮实现卡片，通过key标识选中状态
-            button_label = f"**{conv.title}**\n\n{msg_count} 条消息"
-            
-            if st.button(
-                button_label,
-                key=f"hist_{conv.id}",
-                use_container_width=True,
-                type="primary" if is_active else "secondary"
-            ):
-                if not is_active:
-                    conv_manager.switch_to(conv.id)
-                    st.rerun()
+
+        grouped = conv_manager.get_grouped_sorted()
+        for category, conversations in grouped.items():
+            st.markdown(f"**{category}**")
+            for conv in conversations:
+                is_active = conv.id == conv_manager.current_id
+
+                if st.button(
+                    conv.title,
+                    key=f"hist_{conv.id}",
+                    use_container_width=True,
+                    type="primary" if is_active else "secondary"
+                ):
+                    if not is_active:
+                        conv_manager.switch_to(conv.id)
+                        st.rerun()
     
     return st.session_state.get("api_key", "")
