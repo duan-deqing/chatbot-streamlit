@@ -62,38 +62,39 @@ def load_custom_css():
         .stFileUploader {
             margin-bottom: 0.5rem;
         }
+        
         /* 优化聊天区域显示 */
         .stChatMessage {
             padding: 0.75rem 1rem;
         }
 
         /* 新建对话按钮 - 通过标记元素定位并添加SVG图标 */
-        .stSidebar [data-testid="stMarkdownContainer"]:has(.nc-marker) + .stButton button {
+        .stSidebar [data-testid="stElementContainer"]:has(.nc-marker) + [data-testid="stElementContainer"] .stButton button {
             display: flex !important;
             align-items: center;
             justify-content: center !important;
             gap: 6px;
             padding: 7px 12px !important;
-            border-radius: 8px;
+            border-radius: 100px;
             border: none !important;
-            background: #eef1ff !important;
-            color: #4d6bfe !important;
-            font-size: 14px;
+            background: #0038ff !important;
+            color: #ffffff !important;
+            font-size: 16px;
             line-height: 1.5;
             white-space: nowrap;
             min-height: unset !important;
             height: auto !important;
         }
-        .stSidebar [data-testid="stMarkdownContainer"]:has(.nc-marker) + .stButton button:hover {
-            background: #dce0fa !important;
+        .stSidebar [data-testid="stElementContainer"]:has(.nc-marker) + [data-testid="stElementContainer"] .stButton button:hover {
+            background: #3964fe !important;
         }
-        .stSidebar [data-testid="stMarkdownContainer"]:has(.nc-marker) + .stButton button:disabled {
+        .stSidebar [data-testid="stElementContainer"]:has(.nc-marker) + [data-testid="stElementContainer"] .stButton button:disabled {
             opacity: 0.4;
         }
-        .stSidebar [data-testid="stMarkdownContainer"]:has(.nc-marker) + .stButton button:disabled:hover {
-            background: #eef1ff !important;
+        .stSidebar [data-testid="stElementContainer"]:has(.nc-marker) + [data-testid="stElementContainer"] .stButton button:disabled:hover {
+            background: #3964fe !important;
         }
-        .stSidebar [data-testid="stMarkdownContainer"]:has(.nc-marker) + .stButton button::before {
+        .stSidebar [data-testid="stElementContainer"]:has(.nc-marker) + [data-testid="stElementContainer"] .stButton button::before {
             content: "";
             display: inline-block;
             width: 16px;
