@@ -79,7 +79,7 @@ ollama pull qwen2:7b
 
 ## 📁 项目结构
 
-```
+```txt
 ai-chat/
 ├── app.py                  # 应用入口
 ├── config.py               # 配置文件
@@ -108,7 +108,7 @@ ai-chat/
 在 `config.py` 中可以修改以下配置：
 
 | 配置项 | 说明 | 默认值 |
-|--------|------|--------|
+|:--------|:------|:--------|
 | `PAGE_CONFIG` | 页面配置 | 标题、图标、布局 |
 | `OLLAMA_BASE_URL` | Ollama 服务地址 | `http://localhost:11434/v1` |
 | `UPLOAD_CONFIG` | 文件上传配置 | 支持的文件类型 |
@@ -155,4 +155,4 @@ ai-chat/
 
 ---
 
-<p align="center">Made with ❤️ by AI Chat Team</p>
+<p align="center">Made with ❤️ by STYLAN</p>
