@@ -14,10 +14,10 @@ configure_page()
 load_custom_css()
 
 # 初始化Session State
-conv_manager = init_session_state()
+conv_manager, model_manager = init_session_state()
 
 # 渲染侧边栏
-api_key = render_sidebar(conv_manager)
+api_key = render_sidebar(conv_manager, model_manager)
 
 # 渲染聊天界面
-render_chat_interface(conv_manager, api_key)
+render_chat_interface(conv_manager, model_manager)

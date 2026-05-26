@@ -1,36 +1,27 @@
 """AI服务模块"""
 
-import openai
 from typing import List, Dict
-from config import AI_CONFIG
+from models.base import BaseModel
 
 
 class AIService:
     """AI服务类"""
     
     @staticmethod
-    def call_api(messages: List[Dict], api_key: str) -> str:
-        """调用OpenAI API获取回复
+    def call_model(model: BaseModel, messages: List[Dict]) -> str:
+        """调用模型获取回复
         
         Args:
+            model: 模型实例
             messages: 消息历史列表
-            api_key: API密钥
             
         Returns:
             AI回复内容
         """
-        if not api_key:
-            return "❌ 请先在侧边栏输入有效的 OpenAI API Key。"
+        if model is None:
+            return "❌ 请先选择一个模型。"
         
-        try:
-            openai.api_key = api_key
-            response = openai.ChatCompletion.create(
-                model=AI_CONFIG["model"],
-                messages=messages,
-                temperature=AI_CONFIG["temperature"],
-                max_tokens=AI_CONFIG["max_tokens"],
-                top_p=AI_CONFIG["top_p"]
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            return f"⚠️ API 调用出错: {str(e)}"
+        if not model.is_available():
+            return f"❌ 模型 {model.name} 不可用，请检查配置。"
+        
+        return model.chat(messages)

@@ -1,26 +1,30 @@
 """聊天界面UI模块"""
 
 import streamlit as st
-from models import Conversation, ConversationManager
+from data_models import Conversation, ConversationManager
+from models import ModelManager
 from services.ai_service import AIService
 from services.file_service import FileService
 from config import UPLOAD_CONFIG, TITLE_MAX_LENGTH
 
 
-def render_chat_interface(conv_manager: ConversationManager, api_key: str):
+def render_chat_interface(conv_manager: ConversationManager, model_manager: ModelManager):
     """渲染聊天界面
     
     Args:
         conv_manager: 对话管理器
-        api_key: API密钥
+        model_manager: 模型管理器
     """
     current_conv = conv_manager.get_current()
     if current_conv is None:
         st.error("当前对话不存在，请刷新页面或新建对话。")
         st.stop()
     
-    st.title("💬 AI 聊天助手")
-    st.caption(f"当前对话：{current_conv.title}")
+    # 获取当前模型
+    current_model = model_manager.get_model(st.session_state.current_model_key)
+    
+    st.title("💬 AI Chat")
+    st.caption(f"当前对话：{current_conv.title} | 模型：{current_model.name if current_model else '未选择'}")
     
     # 展示历史消息
     for msg in current_conv.messages:
@@ -45,7 +49,7 @@ def render_chat_interface(conv_manager: ConversationManager, api_key: str):
     # 处理用户输入
     if user_input:
         _process_user_input(
-            user_input, uploaded_file, current_conv, api_key, conv_manager
+            user_input, uploaded_file, current_conv, current_model, conv_manager
         )
 
 
@@ -53,7 +57,7 @@ def _process_user_input(
     user_input: str,
     uploaded_file,
     current_conv: Conversation,
-    api_key: str,
+    current_model,
     conv_manager: ConversationManager
 ):
     """处理用户输入
@@ -62,7 +66,7 @@ def _process_user_input(
         user_input: 用户输入
         uploaded_file: 上传的文件
         current_conv: 当前对话
-        api_key: API密钥
+        current_model: 当前模型
         conv_manager: 对话管理器
     """
     full_prompt = user_input
@@ -72,6 +76,7 @@ def _process_user_input(
         file_content, error = FileService.read_file(uploaded_file)
         if error:
             st.error(error)
+            return
         else:
             full_prompt = FileService.format_file_prompt(
                 file_content, uploaded_file.name, user_input
@@ -83,10 +88,16 @@ def _process_user_input(
     # 将用户消息添加到当前对话
     current_conv.add_message("user", full_prompt)
     
-    # 调用 AI 生成回复
-    with st.spinner("🤔 AI 思考中..."):
-        api_messages = current_conv.get_messages_for_api()
-        ai_response = AIService.call_api(api_messages, api_key)
+    # 立即显示用户消息
+    with st.chat_message("user"):
+        st.markdown(full_prompt)
+    
+    # 显示思考状态并调用AI
+    with st.chat_message("assistant"):
+        with st.spinner("🤔 AI 思考中..."):
+            api_messages = current_conv.get_messages_for_api()
+            ai_response = AIService.call_model(current_model, api_messages)
+        st.markdown(ai_response)
     
     # 将 AI 回复添加到对话
     current_conv.add_message("assistant", ai_response)
@@ -94,5 +105,5 @@ def _process_user_input(
     # 更新对话标题
     current_conv.update_title_from_first_message(TITLE_MAX_LENGTH)
     
-    # 刷新界面以显示新消息
+    # 刷新界面以确保状态同步
     st.rerun()
