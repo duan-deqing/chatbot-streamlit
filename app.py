@@ -21,11 +21,11 @@ load_custom_css()
 # 3. 初始化会话状态（对话管理器、模型管理器、默认值等）
 conv_manager, model_manager = init_session_state()
 
-# 4. 渲染左侧边栏（API Key、模型选择、历史记录、设置入口）
-render_sidebar(conv_manager, model_manager)
+# 4. 渲染左侧边栏（标题、新建对话、历史记录、设置入口）
+render_sidebar(conv_manager)
 
 # 5. 渲染主聊天区（消息列表、输入框、文件上传）
 render_chat_interface(conv_manager, model_manager)
 
-# 6. 渲染设置弹窗（仅在 show_settings 为 True 时显示）
-render_settings()
+# 6. 渲染设置弹窗（API Key、模型配置，仅在 show_settings 为 True 时显示）
+render_settings(model_manager)

@@ -9,8 +9,6 @@ def render_history_section(conv_manager):
     Args:
         conv_manager: 对话管理器
     """
-    st.markdown("---")
-
     current_conv = conv_manager.get_current()
     can_create_new = current_conv is not None and len(current_conv.messages) > 0
 
@@ -48,10 +46,4 @@ def render_history_section(conv_manager):
 
     st.markdown("---")
 
-    if st.button(
-        "⚙️ 设置",
-        key="settings_btn",
-        use_container_width=True
-    ):
-        st.session_state.show_settings = True
-        st.rerun()
+    
