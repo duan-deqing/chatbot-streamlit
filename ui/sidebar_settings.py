@@ -1,22 +1,31 @@
 """设置弹窗模块
 
 使用 Streamlit 原生 st.dialog 实现设置弹窗，按功能区分为标签页。
-状态管理：sidebar 中设置按钮将 show_settings 置为 True，
-render_settings() 检测到 True 时弹出对话框，渲染完成后立即复位为 False，
-避免下一次 rerun（如点击对话卡片）时重复弹出。
+API Key 配置已整合至模型配置标签页，不再单独展示。
+
+对话框生命周期管理：
+- 侧边栏「⚙️ 设置」按钮 → 生成 session token 并设置 show_settings=True
+- render_settings() 检测 show_settings → 打开 st.dialog
+- 内部操作（刷新检测、添加模型等）触发的 rerun 不关闭对话框
+- 「确认」按钮显式关闭 → show_settings=False + rerun
+- X 按钮关闭 → _dialog_active 标志检测，避免后续意外重新弹出
 """
 
 import streamlit as st
-from ui.sidebar_models import render_model_selector, render_ollama_manager
+from ui.sidebar_models import render_model_selector
 
 
 @st.dialog("设置", width="large")
 def settings_dialog(model_manager):
-    """设置弹窗
-    
-    Args:
-        model_manager: 模型管理器实例
+    """设置弹窗内容
+
+    两个标签页：
+    1. 模型配置：供应商/模型双级联动 + 自定义模型管理
+    2. 参数设置：Temperature、MaxTokens、TopP、流式开关
     """
+    # 标记对话框函数体确实执行了（用于 X 按钮检测）
+    st.session_state._dialog_active = True
+
     st.markdown("""
     <style>
     [data-testid="stDialog"] > div > div {
@@ -26,40 +35,10 @@ def settings_dialog(model_manager):
     </style>
     """, unsafe_allow_html=True)
 
-    tab_api, tab_model, tab_chat = st.tabs(["API Key", "模型配置", "聊天"])
-
-    with tab_api:
-        st.markdown("### OpenAI API Key 配置")
-        st.caption("API Key 仅存储在本地会话中，不会上传到任何服务器。")
-
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            api_key_input = st.text_input(
-                "API Key",
-                type="password",
-                value=st.session_state.get("api_key", ""),
-                placeholder="sk-...",
-                label_visibility="collapsed"
-            )
-        with col2:
-            if st.button("保存", key="save_api_key", use_container_width=True):
-                if api_key_input:
-                    st.session_state.api_key = api_key_input
-                    model_manager.set_openai_api_key(api_key_input)
-                    st.success("已保存")
-                else:
-                    st.warning("请输入 Key")
-
-        if st.session_state.get("api_key", ""):
-            masked = st.session_state.api_key[:8] + "****" + st.session_state.api_key[-4:]
-            st.success(f"已配置: `{masked}`")
-        else:
-            st.warning("⚠️ 未配置 API Key，无法使用 OpenAI 系列模型。")
+    tab_model, tab_chat = st.tabs(["模型配置", "参数设置"])
 
     with tab_model:
         render_model_selector(model_manager)
-        st.divider()
-        render_ollama_manager(model_manager)
 
     with tab_chat:
         st.markdown("### 模型参数")
@@ -92,7 +71,7 @@ def settings_dialog(model_manager):
         )
 
         st.divider()
-        st.markdown("### 聊天行为")
+        st.markdown("### 输出模式")
         st.checkbox(
             "🔄 启用流式输出",
             value=st.session_state.get("enable_streaming", True),
@@ -100,6 +79,7 @@ def settings_dialog(model_manager):
             help="开启后 AI 回复会逐字显示，带来更快的首字响应体验。"
         )
 
+    # 确认按钮：显式关闭对话框的唯一入口
     st.divider()
     _, col_close, _ = st.columns([2, 1, 2])
     with col_close:
@@ -109,15 +89,33 @@ def settings_dialog(model_manager):
 
 
 def render_settings(model_manager):
-    """渲染设置弹窗入口
-    
-    由 app.py 在每次 rerun 时调用。
-    仅在 show_settings 为 True 时弹出 st.dialog，
-    并立即复位 show_settings，防止状态泄漏导致重复弹出。
-    
-    Args:
-        model_manager: 模型管理器实例
+    """对话框渲染入口（app.py 每次 rerun 时调用）
+
+    状态机：
+    ┌─────────────┐   打开设置    ┌─────────────┐
+    │ show_settings│ ──────────→  │  对话框打开   │
+    │   = False   │              │ _dialog_active│
+    └─────────────┘              │   = True     │
+          ↑                      └──────┬──────┘
+          │                             │
+          │  确认按钮 / X关闭             │ 内部操作 (rerun)
+          │                             ↓
+          └────────────────────  show_settings 不变
+                                  _dialog_active=True
     """
-    if st.session_state.get("show_settings", False):
-        settings_dialog(model_manager)
+    if not st.session_state.get("show_settings", False):
+        return
+
+    # 防止同一 session 重复弹出（X 关闭后又交互触发）
+    session_id = st.session_state.get("_settings_session", "")
+    if session_id == st.session_state.get("_closed_session", ""):
+        return
+
+    # 重置标记，对话框函数体执行时会设为 True
+    st.session_state._dialog_active = False
+    settings_dialog(model_manager)
+
+    # X 关闭检测：函数体未执行（_dialog_active 仍为 False）说明对话框被关闭
+    if st.session_state.get("show_settings", False) and not st.session_state.get("_dialog_active", False):
+        st.session_state._closed_session = session_id
         st.session_state.show_settings = False
