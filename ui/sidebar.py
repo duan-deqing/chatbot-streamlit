@@ -1,7 +1,7 @@
 """侧边栏UI模块"""
 
 import streamlit as st
-from data_models import ConversationManager
+from data import ConversationManager
 from ui.sidebar_history import render_history_section
 
 

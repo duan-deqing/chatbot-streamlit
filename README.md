@@ -1,10 +1,10 @@
 # AI Chat 💬
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.0+-FF4B4B.svg)](https://streamlit.io/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/) [![Streamlit](https://img.shields.io/badge/Streamlit-1.0+-FF4B4B.svg)](https://streamlit.io/)[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 一个基于 Streamlit 的 AI 聊天应用，支持 OpenAI 和本地 Ollama 模型，提供多对话管理和文件上传功能。
+
+![主界面截图](./docs/images/1.主页面截图.png)
 
 ## ✨ 功能特性
 
@@ -107,12 +107,12 @@ ai-chat/
 
 在 `config.py` 中可以修改以下配置：
 
-| 配置项 | 说明 | 默认值 |
-|:--------|:------|:--------|
-| `PAGE_CONFIG` | 页面配置 | 标题、图标、布局 |
-| `OLLAMA_BASE_URL` | Ollama 服务地址 | `http://localhost:11434/v1` |
-| `UPLOAD_CONFIG` | 文件上传配置 | 支持的文件类型 |
-| `TITLE_MAX_LENGTH` | 对话标题最大长度 | 30 |
+| 配置项             | 说明             | 默认值                      |
+| :----------------- | :--------------- | :-------------------------- |
+| `PAGE_CONFIG`      | 页面配置         | 标题、图标、布局            |
+| `OLLAMA_BASE_URL`  | Ollama 服务地址  | `http://localhost:11434/v1` |
+| `UPLOAD_CONFIG`    | 文件上传配置     | 支持的文件类型              |
+| `TITLE_MAX_LENGTH` | 对话标题最大长度 | 30                          |
 
 ## 🛠️ 扩展开发
 

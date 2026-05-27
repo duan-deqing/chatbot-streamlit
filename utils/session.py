@@ -1,7 +1,7 @@
 """Session管理工具模块"""
 
 import streamlit as st
-from data_models import ConversationManager
+from data import ConversationManager
 from models import ModelManager
 
 

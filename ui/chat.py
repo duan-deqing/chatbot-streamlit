@@ -1,7 +1,7 @@
 """聊天界面UI模块"""
 
 import streamlit as st
-from data_models import Conversation, ConversationManager
+from data import Conversation, ConversationManager
 from models import ModelManager
 from services.ai_service import AIService
 from services.file_service import FileService

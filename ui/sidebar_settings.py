@@ -9,7 +9,6 @@ render_settings() 检测到 True 时弹出对话框，渲染完成后立即复�
 import streamlit as st
 from ui.sidebar_models import render_model_selector, render_ollama_manager
 
-
 @st.dialog("设置", width="large")
 def settings_dialog(model_manager):
     """设置弹窗
@@ -26,7 +25,7 @@ def settings_dialog(model_manager):
     </style>
     """, unsafe_allow_html=True)
 
-    tab_api, tab_model, tab_chat = st.tabs(["API Key", "模型配置", "聊天"])
+    tab_api, tab_model, tab_chat = st.tabs(["API Key", "模型配置", "参数设置"])
 
     with tab_api:
         st.markdown("### OpenAI API Key 配置")
@@ -56,11 +55,13 @@ def settings_dialog(model_manager):
         else:
             st.warning("⚠️ 未配置 API Key，无法使用 OpenAI 系列模型。")
 
+    # 模型配置
     with tab_model:
         render_model_selector(model_manager)
-        st.divider()
+        
         render_ollama_manager(model_manager)
 
+    # 参数设置
     with tab_chat:
         st.markdown("### 模型参数")
         st.slider(
@@ -92,7 +93,7 @@ def settings_dialog(model_manager):
         )
 
         st.divider()
-        st.markdown("### 聊天行为")
+        st.markdown("### 输出模式")
         st.checkbox(
             "🔄 启用流式输出",
             value=st.session_state.get("enable_streaming", True),
