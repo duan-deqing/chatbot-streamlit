@@ -1,7 +1,7 @@
 """模型基类"""
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Generator
 from dataclasses import dataclass
 
 
@@ -33,6 +33,11 @@ class BaseModel(ABC):
             模型回复内容
         """
         pass
+    
+    def chat_stream(self, messages: List[Dict], **kwargs) -> Generator[str, None, None]:
+        """流式聊天（默认降级为一次性输出，子类可覆盖实现真正的流式）"""
+        result = self.chat(messages, **kwargs)
+        yield result
     
     @abstractmethod
     def is_available(self) -> bool:

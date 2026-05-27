@@ -24,5 +24,17 @@ def init_session_state() -> tuple:
     
     if "current_model_key" not in st.session_state:
         st.session_state.current_model_key = "openai_gpt-3.5-turbo"
+
+    if "enable_streaming" not in st.session_state:
+        st.session_state.enable_streaming = True
+
+    if "temperature" not in st.session_state:
+        st.session_state.temperature = 0.7
+
+    if "max_tokens" not in st.session_state:
+        st.session_state.max_tokens = 1000
+
+    if "top_p" not in st.session_state:
+        st.session_state.top_p = 0.9
     
     return st.session_state.conversation_manager, st.session_state.model_manager

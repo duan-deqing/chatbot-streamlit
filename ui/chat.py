@@ -97,12 +97,27 @@ def _process_user_input(
     with st.chat_message("user"):
         st.markdown(full_prompt)
     
-    # 显示思考状态并调用AI
+    # 调用 AI 获取回复
+    api_messages = current_conv.get_messages_for_api()
+
+    model_params = {
+        "temperature": st.session_state.get("temperature", 0.7),
+        "max_tokens": st.session_state.get("max_tokens", 1000),
+        "top_p": st.session_state.get("top_p", 0.9),
+    }
+
     with st.chat_message("assistant"):
-        with st.spinner("🤔 AI 思考中..."):
-            api_messages = current_conv.get_messages_for_api()
-            ai_response = AIService.call_model(current_model, api_messages)
-        st.markdown(ai_response)
+        if st.session_state.get("enable_streaming", True):
+            thinking_placeholder = st.empty()
+            thinking_placeholder.caption("💭 思考中...")
+            ai_response = st.write_stream(
+                AIService.call_model_stream(current_model, api_messages, **model_params)
+            )
+            thinking_placeholder.empty()
+        else:
+            with st.spinner("思考中..."):
+                ai_response = AIService.call_model(current_model, api_messages, **model_params)
+            st.markdown(ai_response)
     
     # 将 AI 回复添加到对话
     current_conv.add_message("assistant", ai_response)

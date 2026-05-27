@@ -26,7 +26,7 @@ def settings_dialog(model_manager):
     </style>
     """, unsafe_allow_html=True)
 
-    tab_api, tab_model = st.tabs(["API Key", "模型配置"])
+    tab_api, tab_model, tab_chat = st.tabs(["API Key", "模型配置", "聊天"])
 
     with tab_api:
         st.markdown("### OpenAI API Key 配置")
@@ -61,10 +61,49 @@ def settings_dialog(model_manager):
         st.divider()
         render_ollama_manager(model_manager)
 
+    with tab_chat:
+        st.markdown("### 模型参数")
+        st.slider(
+            "Temperature（创造性）",
+            min_value=0.0,
+            max_value=2.0,
+            value=st.session_state.get("temperature", 0.7),
+            step=0.05,
+            key="temperature",
+            help="越高越有创造性，越低越保守。"
+        )
+        st.slider(
+            "Max Tokens（最大输出长度）",
+            min_value=100,
+            max_value=4096,
+            value=st.session_state.get("max_tokens", 1000),
+            step=100,
+            key="max_tokens",
+            help="单次回复的最大 token 数。"
+        )
+        st.slider(
+            "Top P（核采样）",
+            min_value=0.0,
+            max_value=1.0,
+            value=st.session_state.get("top_p", 0.9),
+            step=0.05,
+            key="top_p",
+            help="累积概率阈值，1.0 表示考虑所有词。"
+        )
+
+        st.divider()
+        st.markdown("### 聊天行为")
+        st.checkbox(
+            "🔄 启用流式输出",
+            value=st.session_state.get("enable_streaming", True),
+            key="enable_streaming",
+            help="开启后 AI 回复会逐字显示，带来更快的首字响应体验。"
+        )
+
     st.divider()
     _, col_close, _ = st.columns([2, 1, 2])
     with col_close:
-        if st.button("关闭", key="close_settings", use_container_width=True):
+        if st.button("确认", key="close_settings", use_container_width=True):
             st.session_state.show_settings = False
             st.rerun()
 

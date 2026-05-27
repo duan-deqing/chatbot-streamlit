@@ -3,7 +3,7 @@
 import time
 import httpx
 import openai
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Generator
 from models.base import BaseModel, ModelConfig
 
 
@@ -35,18 +35,52 @@ class OllamaModel(BaseModel):
             模型回复
         """
         try:
+            temperature = kwargs.get("temperature", self.config.temperature)
+            max_tokens = kwargs.get("max_tokens", self.config.max_tokens)
+            top_p = kwargs.get("top_p", self.config.top_p)
             response = self.client.chat.completions.create(
                 model=self.config.model_id,
                 messages=messages,
-                temperature=self.config.temperature,
-                max_tokens=self.config.max_tokens,
-                top_p=self.config.top_p
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=top_p
             )
             return response.choices[0].message.content
         except (httpx.ConnectError, httpx.ConnectTimeout):
             return "❌ 无法连接到 Ollama 服务，请确保 Ollama 已启动。"
         except Exception as e:
             return f"⚠️ Ollama 调用出错: {str(e)}"
+    
+    def chat_stream(self, messages: List[Dict], **kwargs) -> Generator[str, None, None]:
+        """流式调用 Ollama API（使用OpenAI SDK）
+        
+        Args:
+            messages: 消息列表
+            **kwargs: 额外参数
+            
+        Yields:
+            逐段模型回复内容
+        """
+        try:
+            temperature = kwargs.get("temperature", self.config.temperature)
+            max_tokens = kwargs.get("max_tokens", self.config.max_tokens)
+            top_p = kwargs.get("top_p", self.config.top_p)
+            stream = self.client.chat.completions.create(
+                model=self.config.model_id,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                top_p=top_p,
+                stream=True
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta
+                if delta.content:
+                    yield delta.content
+        except (httpx.ConnectError, httpx.ConnectTimeout):
+            yield "❌ 无法连接到 Ollama 服务，请确保 Ollama 已启动。"
+        except Exception as e:
+            yield f"⚠️ Ollama 调用出错: {str(e)}"
     
     def _is_cache_valid(self) -> bool:
         """检查缓存是否有效"""
