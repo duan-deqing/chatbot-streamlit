@@ -18,10 +18,7 @@ def init_session_state() -> tuple:
     
     if "model_manager" not in st.session_state:
         st.session_state.model_manager = ModelManager()
-    
-    if "api_key" not in st.session_state:
-        st.session_state.api_key = ""
-    
+
     if "current_model_key" not in st.session_state:
         st.session_state.current_model_key = "openai_gpt-3.5-turbo"
 

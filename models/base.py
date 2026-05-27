@@ -10,6 +10,10 @@ class ModelConfig:
     """模型配置"""
     name: str
     model_id: str
+    provider: str = ""
+    base_url: str = ""
+    api_key: str = ""
+    is_builtin: bool = False
     temperature: float = 0.7
     max_tokens: int = 1000
     top_p: float = 0.9

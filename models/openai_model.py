@@ -7,31 +7,25 @@ from models.base import BaseModel, ModelConfig
 
 class OpenAIModel(BaseModel):
     """OpenAI模型"""
-    
+
     def __init__(self, config: ModelConfig, api_key: str = ""):
         super().__init__(config)
-        self.api_key = api_key
+        self.api_key = api_key or config.api_key
+        self.base_url = config.base_url or None
         self._client = None
-    
+
     def _get_client(self) -> openai.OpenAI:
-        """获取或创建客户端"""
+        kwargs = {"api_key": self.api_key}
+        if self.base_url:
+            kwargs["base_url"] = self.base_url
         if self._client is None or self._client.api_key != self.api_key:
-            self._client = openai.OpenAI(api_key=self.api_key)
+            self._client = openai.OpenAI(**kwargs)
         return self._client
-    
+
     def chat(self, messages: List[Dict], **kwargs) -> str:
-        """调用OpenAI API
-        
-        Args:
-            messages: 消息列表
-            **kwargs: 额外参数
-            
-        Returns:
-            模型回复
-        """
         if not self.api_key:
-            return "❌ 请先输入有效的 OpenAI API Key。"
-        
+            return "❌ 请先为当前模型配置 API Key。"
+
         try:
             temperature = kwargs.get("temperature", self.config.temperature)
             max_tokens = kwargs.get("max_tokens", self.config.max_tokens)
@@ -47,21 +41,12 @@ class OpenAIModel(BaseModel):
             return response.choices[0].message.content
         except Exception as e:
             return f"⚠️ API 调用出错: {type(e).__name__}"
-    
+
     def chat_stream(self, messages: List[Dict], **kwargs) -> Generator[str, None, None]:
-        """流式调用 OpenAI API
-        
-        Args:
-            messages: 消息列表
-            **kwargs: 额外参数
-            
-        Yields:
-            逐段模型回复内容
-        """
         if not self.api_key:
-            yield "❌ 请先输入有效的 OpenAI API Key。"
+            yield "❌ 请先为当前模型配置 API Key。"
             return
-        
+
         try:
             temperature = kwargs.get("temperature", self.config.temperature)
             max_tokens = kwargs.get("max_tokens", self.config.max_tokens)
@@ -81,11 +66,10 @@ class OpenAIModel(BaseModel):
                     yield delta.content
         except Exception as e:
             yield f"⚠️ API 调用出错: {type(e).__name__}"
-    
+
     def is_available(self) -> bool:
-        """检查是否可用"""
         return bool(self.api_key)
-    
+
     def set_api_key(self, api_key: str):
-        """设置API密钥"""
         self.api_key = api_key
+        self._client = None

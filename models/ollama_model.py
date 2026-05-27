@@ -16,12 +16,12 @@ class OllamaModel(BaseModel):
     _last_check_time: float = 0
     _cache_ttl: float = 300  # 缓存有效期（秒），默认5分钟
     
-    def __init__(self, config: ModelConfig, base_url: str = "http://localhost:11434/v1"):
+    def __init__(self, config: ModelConfig, base_url: str = ""):
         super().__init__(config)
-        self.base_url = base_url.rstrip('/')
+        self.base_url = (base_url or config.base_url or "http://localhost:11434/v1").rstrip('/')
         self.client = openai.OpenAI(
             base_url=self.base_url,
-            api_key="ollama"  # Ollama不需要真实的API key
+            api_key="ollama"
         )
     
     def chat(self, messages: List[Dict], **kwargs) -> str:

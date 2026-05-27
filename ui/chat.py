@@ -21,7 +21,10 @@ def render_chat_interface(conv_manager: ConversationManager, model_manager: Mode
         st.stop()
     
     # 获取当前模型
-    current_model = model_manager.get_model(st.session_state.current_model_key)
+    current_model = model_manager.get_current_model(st.session_state.current_model_key)
+    if current_model is None:
+        st.warning("⚠️ 当前模型不可用，请在设置中重新选择模型。")
+        st.stop()
     
     # 为每个对话生成唯一的文件上传 key
     upload_key = f"{UPLOAD_CONFIG['key']}_{current_conv.id}"
